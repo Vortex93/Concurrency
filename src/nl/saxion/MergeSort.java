@@ -26,16 +26,13 @@ public class MergeSort {
         }
     }
 
-    private static int[] merge(int[] array, int[] left, int[] right) {
-        int leftLength = left.length;
+    public static int[] merge(int[] array, int[] left, int[] right) {
         int leftCursor = 0; //Left index
-        int rightLength = right.length;
         int rightCursor = 0; //Right index
-
         int arrayCursor = 0; //Merged index
 
         //Go through both left and right array
-        while (leftCursor < leftLength && rightCursor < rightLength) {
+        while (leftCursor < left.length && rightCursor < right.length) {
             if (left[leftCursor] > right[rightCursor]) {
                 array[arrayCursor++] = left[leftCursor++];
             } else {
@@ -44,12 +41,12 @@ public class MergeSort {
         }
 
         //If left has not been fully filled in merged
-        while (leftCursor < leftLength) {
+        while (leftCursor < left.length) {
             array[arrayCursor++] = left[leftCursor++];
         }
 
         //If right has not been fully filled in merged
-        while (rightCursor < rightLength) {
+        while (rightCursor < right.length) {
             array[arrayCursor++] = right[rightCursor++];
         }
         return array;
