@@ -1,12 +1,12 @@
-package nl.saxion.assignment_1_3;
+package nl.saxion.assignment_1.assignment_1_3;
 
-import nl.saxion.Generator;
-import nl.saxion.MergeSort;
+import nl.saxion.assignment_1.Generator;
+import nl.saxion.assignment_1.MergeSort;
 
 import java.util.Arrays;
 
 /**
- * Determine the sorting of the whole array by dividing the array in two halves, as in assignment 1.2, and
+ * Determine the sorting of the whole array by dividing the array in two halves, as in assignment_1 1.2, and
  * start a thread for each half, each thread being responsible for sorting the numbers assigned to it. This
  * time, if the amount of numbers is 'too high' (above a certain threshold), the thread will start 2 new
  * threads for sorting the numbers assigned to it, which will each process half of the numbers, and the

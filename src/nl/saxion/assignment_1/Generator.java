@@ -1,4 +1,4 @@
-package nl.saxion;
+package nl.saxion.assignment_1;
 
 import java.util.Random;
 

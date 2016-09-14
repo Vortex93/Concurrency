@@ -1,10 +1,10 @@
-package nl.saxion.assignment_1_1;
+package nl.saxion.assignment_1.assignment_1_1;
 
-import nl.saxion.BubbleSort;
-import nl.saxion.Generator;
+import nl.saxion.assignment_1.BubbleSort;
+import nl.saxion.assignment_1.Generator;
 
 /**
- * Withholds source code for assignment 1.1
+ * Withholds source code for assignment_1 1.1
  * <p>
  * Instruction:
  * Write a Java programme that generates a certain amount of whole numbers and places these numbers

@@ -1,18 +1,18 @@
-package nl.saxion.assignment_1_2;
+package nl.saxion.assignment_1.assignment_1_2;
 
-import nl.saxion.BubbleSort;
-import nl.saxion.Generator;
+import nl.saxion.assignment_1.BubbleSort;
+import nl.saxion.assignment_1.Generator;
 
 import java.util.Arrays;
 
 /**
- * Withholds source code for assignment 1.2
+ * Withholds source code for assignment_1 1.2
  * <p>
  * Instruction:
- * The same as in assignment 1.1, but now have the sorting (bubble sort) performed by 2 threads each
+ * The same as in assignment_1 1.1, but now have the sorting (bubble sort) performed by 2 threads each
  * processing one half of the array. The main thread can then simply determine the sorting of the whole
  * array by merging these assorted partial results. How much time was needed now? What is the
- * connection with the measurement results from the previous assignment? How do you explain this?
+ * connection with the measurement results from the previous assignment_1? How do you explain this?
  * <p>
  * Created by Derwin on 02-Sep-16.
  */
