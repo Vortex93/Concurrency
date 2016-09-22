@@ -1,5 +1,10 @@
 package nl.saxion.assignment_2;
 
+import nl.saxion.assignment_2.user.Developer;
+import nl.saxion.assignment_2.user.Leader;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -7,19 +12,29 @@ import java.util.concurrent.Semaphore;
  */
 public class SoftwareConsultation extends Consultation {
 
-    public static final int DEVELOPER_AMOUNT = 3; // can be more
-    public static final int LEADER_AMOUNT = 1;
-
     ///////////////////////////////////////////////////////////////////////////
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private Semaphore leaderReady = new Semaphore(LEADER_AMOUNT);
-    private Semaphore developerReady = new Semaphore(DEVELOPER_AMOUNT);
+    /**
+     * A software consultation consists of at least 3 developers.
+     */
+    private final List<Developer> developers = new ArrayList<>();
 
-    public void addPerson(Person person) {
-        people.add(person);
+    private Semaphore leaderReady = new Semaphore(1);
+    private Semaphore developerReady = new Semaphore(0);
+
+    /**
+     * Constructor
+     */
+    public SoftwareConsultation(Leader leader) {
+        super(leader);
     }
 
-
+    public void addDeveloper(Developer developer) {
+        this.developers.add(developer);
+        if (this.developers.size() >= 3) {
+            developerReady.release(1);
+        }
+    }
 }
