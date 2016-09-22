@@ -68,6 +68,7 @@ public class Developer extends Person {
                         // TODO: 23-Sep-16 Implementation of the software consultation
 
                     }
+                    super.consultation = null;
                     System.out.println(toString() + " continues with work.");
                 } else {
                     getCompany().removeAvailableDeveloper(this); //Remove from the queue

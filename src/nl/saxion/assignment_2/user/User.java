@@ -23,14 +23,6 @@ import java.util.concurrent.Semaphore;
  * in the user consultation, while the other software developer(s) find(s) that hse /she is/are too late
  * for the consultation and can go back to work.
  * <p>
- * Represents the user that reports to the leader of the company to
- * schedule a user consultation.
- * <p>
- * The user basically lives it's life until the point
- * where the user encounters a problem and sends a report
- * to the company. Where thereby the company sends the user an
- * invitation to participate in a user consultation.
- * <p>
  * Created by Derwin on 14-Sep-16.
  */
 public class User extends Person {
@@ -45,7 +37,7 @@ public class User extends Person {
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private Semaphore waitForInvitation = new Semaphore(0);
+    private final Semaphore waitForInvitation = new Semaphore(0);
 
     /**
      * This is just for randomness.
@@ -87,19 +79,20 @@ public class User extends Person {
 
                     System.out.println(toString() + " arrives at the consultation.");
 
-                    UserConsultation consultation = (UserConsultation) this.consultation;
+                    UserConsultation consultation = (UserConsultation) super.consultation;
                     consultation.addUser(this); //User arrives to the consultation
 
                     System.out.println(toString() + " waits until the consultation is ready.");
-                    consultation.waitUntilReady(); //Waits until the user consultation is ready
 
-                    System.out.println(toString() + " attending consultation.");
+                    consultation.waitUntilReady(); //Waits until the user consultation is ready
                     consultation.waitUntilEnd(); //Waits until the consultation ends
 
                     System.out.println(toString() + " exiting the consultation.");
 
                     //This is to lower the chance of encountering the next problem
                     problemEncounterProbabilityMultiplier = RANDOM.nextFloat();
+
+                    super.consultation = null;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

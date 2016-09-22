@@ -17,7 +17,7 @@ import java.util.concurrent.Semaphore;
 public class Company {
 
     private static final int DEVELOPER_COUNT = 6;
-    private static final int USER_COUNT = 1;
+    private static final int USER_COUNT = 2;
 
     ///////////////////////////////////////////////////////////////////////////
     // Properties
@@ -36,7 +36,7 @@ public class Company {
      * Queue list of developers who are available for consultation.
      */
     private final LinkedBlockingQueue<Developer> availableDevelopers = new LinkedBlockingQueue<>();
-    private final Semaphore hasAvailableDeveloper = new Semaphore(0);
+    private final Semaphore hasAvailableDeveloper = new Semaphore(0, true);
 
     /**
      * Reports that are sent by the users.

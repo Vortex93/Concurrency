@@ -4,6 +4,8 @@ import nl.saxion.assignment_2.user.Developer;
 import nl.saxion.assignment_2.user.Leader;
 import nl.saxion.assignment_2.user.User;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -29,8 +31,10 @@ public class UserConsultation extends Consultation {
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private Semaphore userArrived = new Semaphore(0);
-    private Semaphore developerReady = new Semaphore(0);
+    private final List<User> invitedUsers = new ArrayList<>();
+
+    private final Semaphore usersReady = new Semaphore(0);
+    private final Semaphore developerReady = new Semaphore(0);
 
     /**
      * Constructor
@@ -41,8 +45,8 @@ public class UserConsultation extends Consultation {
 
     @Override
     public void begin() throws InterruptedException {
-        userArrived.acquire();
-        developerReady.acquire();
+        usersReady.acquire(invitedUsers.size());
+        developerReady.acquire(1);
         super.begin();
     }
 
@@ -63,6 +67,12 @@ public class UserConsultation extends Consultation {
         }
     }
 
+    public void addInvitedUser(User user) {
+        assert user != null;
+
+        invitedUsers.add(user);
+    }
+
     /**
      * The user calls this method when the user has arrived to the consultation.
      *
@@ -70,9 +80,12 @@ public class UserConsultation extends Consultation {
      */
     public void addUser(User user) {
         assert user != null;
+        assert invitedUsers.size() == getUsers().size();
 
         super.addUser(user); //Add the user
-        userArrived.release(1); //Notify that the user has arrived
+        if (getUsers().size() == invitedUsers.size()) {
+            usersReady.release(invitedUsers.size()); //Notify that all users are ready
+        }
     }
 
     @Override

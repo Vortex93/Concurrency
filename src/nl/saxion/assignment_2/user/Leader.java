@@ -4,7 +4,6 @@ import nl.saxion.assignment_2.Company;
 import nl.saxion.assignment_2.Report;
 import nl.saxion.assignment_2.UserConsultation;
 
-import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
@@ -18,8 +17,6 @@ public class Leader extends Person {
     ///////////////////////////////////////////////////////////////////////////
     // Properties
     ///////////////////////////////////////////////////////////////////////////
-
-    private Random random = new Random();
 
     /**
      * This semaphore is conditionally dependant on:
@@ -49,11 +46,6 @@ public class Leader extends Person {
         while (true) {
             try {
                 work(); //Delay for 1000 to 2000 ms
-                if (readyForConsultation.tryAcquire()) {
-                    //The leader is ready to start the consultation
-                    System.out.println(toString() + " is ready to start a consultation");
-
-                }
 
                 /*
                 User Consultation
@@ -64,14 +56,17 @@ public class Leader extends Person {
 
                     //Get the reports
                     LinkedBlockingQueue<Report> reports = getCompany().getReports();
-                    Report report = reports.poll(); //Get the most recent report
 
-                    User user = report.getUser(); //Get the user in charge of the report
                     UserConsultation userConsultation = new UserConsultation(this);
 
-                    System.out.println(toString() + " inviting " + user.toString() + " to the consultation.");
-                    user.assignConsultation(userConsultation); //Invite the user to the consultation
+                    for (int i = 0; i < reports.size(); i++) {
+                        Report report = reports.poll();
+                        User user = report.getUser(); //Get the user in charge of the report
 
+                        System.out.println(toString() + " inviting " + user.toString() + " to the consultation.");
+                        user.assignConsultation(userConsultation); //Invite the user to the consultation
+                        userConsultation.addInvitedUser(user);
+                    }
 
                     //Wait for developers to be available
                     System.out.println(toString() + " is getting available developers.");
