@@ -1,6 +1,6 @@
 package nl.saxion.assignment_2;
 
-import nl.saxion.assignment_2.user.User;
+import nl.saxion.assignment_2.user.Person;
 
 /**
  * Created by Derwin on 14-Sep-16.
@@ -11,28 +11,33 @@ public class Report {
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private User user;
+    private Person person;
     private String problem;
 
     /**
      * Constructor
-     *
-     * @param user    The user making this report.
-     * @param problem The problem of the user.
+     * @param person Person who writes the report.
+     * @param problem Description of the report.
      */
-    public Report(User user, String problem) {
-        assert user != null;
-        assert problem != null;
+    public Report(Person person, String problem) {
+        assert person != null : "person is null";
+        assert problem != null : "problem is null";
+        assert !problem.isEmpty() : "problem is empty";
 
-        this.user = user;
+        this.person = person;
         this.problem = problem;
     }
 
-    public User getUser() {
-        return user;
+    ///////////////////////////////////////////////////////////////////////////
+    // Getters
+    ///////////////////////////////////////////////////////////////////////////
+
+    public Person getPerson() {
+        return person;
     }
 
     public String getProblem() {
         return problem;
     }
+
 }

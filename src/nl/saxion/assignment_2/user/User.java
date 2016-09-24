@@ -120,7 +120,7 @@ public class User extends Person {
      */
     private void reportIn() throws InterruptedException {
         Report report = new Report(this, "I have a brain problem!!");
-        getCompany().addReport(report);
+        getCompany().addUserReport(report);
     }
 
     /**

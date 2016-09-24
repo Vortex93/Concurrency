@@ -1,9 +1,6 @@
 package nl.saxion.assignment_2.user;
 
-import nl.saxion.assignment_2.Company;
-import nl.saxion.assignment_2.Consultation;
-import nl.saxion.assignment_2.SoftwareConsultation;
-import nl.saxion.assignment_2.UserConsultation;
+import nl.saxion.assignment_2.*;
 
 /**
  * A software developer can participate in two types of consultation:
@@ -41,6 +38,7 @@ public class Developer extends Person {
     public void run() {
         while (true) {
             try {
+                System.out.println(toString() + " is working");
                 work(); //Busy for 1000 to 5000 ms
 
                 getCompany().addAvailableDeveloper(this); //Add to the available queue
@@ -70,6 +68,9 @@ public class Developer extends Person {
                     System.out.println(toString() + " continues with work.");
                 } else {
                     getCompany().removeAvailableDeveloper(this); //Remove from the queue
+                    if (getRandomDecision(0.2f)) {
+                        reportIn();
+                    }
                 }
                 //Developer gets back to work
                 isAttendingConsultation = false;
@@ -107,6 +108,16 @@ public class Developer extends Person {
     private void chill() {
         super.waitRandomTime(100, 1000);
     }
+
+    /**
+     * The developer reports to the company.
+     */
+    private void reportIn() throws InterruptedException {
+        System.out.println(toString() + " wrote a report");
+        Report report = new Report(this, "I have a my grandmother's pc problem! I hate this company!");
+        getCompany().addSoftwareReport(report);
+    }
+
 
     @Override
     public String toString() {

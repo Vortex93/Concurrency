@@ -36,12 +36,17 @@ public class Company {
      * Queue list of developers who are available for consultation.
      */
     private final List<Developer> availableDevelopers = new ArrayList<>();
-    private final Semaphore hasAvailableDeveloper = new Semaphore(0, true);
+    private final Semaphore hasAvailableDevelopers = new Semaphore(0, true);
 
     /**
      * Reports that are sent by the users.
      */
-    private final List<Report> reports = new ArrayList<>();
+    private final List<Report> userReports = new ArrayList<>();
+
+    /**
+     * Reports that are sent by the software developers.
+     */
+    private final List<Report> softwareReports = new ArrayList<>();
 
     /**
      * This is the number of users.
@@ -81,13 +86,23 @@ public class Company {
     }
 
     /**
-     * Add report to the report list.
+     * Add report to the user report list.
      *
      * @param report Report to be added.
      */
-    public void addReport(Report report) throws InterruptedException {
-        assert report != null;
-        reports.add(report);
+    public void addUserReport(Report report) throws InterruptedException {
+        assert report != null : "null report";
+        userReports.add(report);
+    }
+
+    /**
+     * Add report to the software report list.
+     *
+     * @param report Report to be added.
+     */
+    public void addSoftwareReport(Report report) throws InterruptedException {
+        assert report != null : "null report";
+        softwareReports.add(report);
     }
 
     /**
@@ -105,17 +120,24 @@ public class Company {
     }
 
     /**
-     * @return Returns the queue of the reports.
+     * @return Returns the queue of the user reports.
      */
-    public List<Report> getReports() {
-        return reports;
+    public List<Report> getUserReports() {
+        return userReports;
     }
 
     /**
-     * @return Returns true if there is any reports, otherwise false.
+     * @return Returns the queue of the software reports.
+     */
+    public List<Report> getSoftwareReports() {
+        return softwareReports;
+    }
+
+    /**
+     * @return Returns true if there is any user reports, otherwise false.
      */
     public boolean hasReports() {
-        return reports.size() > 0;
+        return userReports.size() > 0;
     }
 
     public void addAvailableDeveloper(Developer developer) throws InterruptedException {
@@ -125,7 +147,7 @@ public class Company {
         availableDevelopers.add(developer);
 
         if (availableDevelopers.size() > 0) {
-            hasAvailableDeveloper.release(1);
+            hasAvailableDevelopers.release(1);
         }
     }
 
@@ -133,7 +155,7 @@ public class Company {
      * @return Returns the first available developer.
      */
     public Developer getAvailableDeveloper() throws InterruptedException {
-        hasAvailableDeveloper.acquire();
+        hasAvailableDevelopers.acquire();
         return availableDevelopers.remove(0); //Remove the first one
     }
 
@@ -143,7 +165,16 @@ public class Company {
         availableDevelopers.remove(developer);
 
         if (availableDevelopers.size() == 0) {
-            hasAvailableDeveloper.drainPermits();
+            hasAvailableDevelopers.drainPermits();
         }
+    }
+
+    /**
+     * @return Returns list of available developers.
+     */
+    public List<Developer> getAvailableDevelopers() throws InterruptedException {
+        hasAvailableDevelopers.acquire();
+       /* availableDevelopers.clear();*/
+        return availableDevelopers;
     }
 }

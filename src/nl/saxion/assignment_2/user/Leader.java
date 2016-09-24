@@ -2,6 +2,7 @@ package nl.saxion.assignment_2.user;
 
 import nl.saxion.assignment_2.Company;
 import nl.saxion.assignment_2.Report;
+import nl.saxion.assignment_2.SoftwareConsultation;
 import nl.saxion.assignment_2.UserConsultation;
 
 import java.util.List;
@@ -51,47 +52,92 @@ public class Leader extends Person {
                 User Consultation
                  */
                 //Check whether there is report from users
-                if (getCompany().getReports().size() > 0) {
-                    //Report received
-                    System.out.println(toString() + " received report.");
-                    System.out.println(toString() + " is looking for available developers.");
+//                if (getCompany().getUserReports().size() > 0) {
+//                    actUserConsulatation();
+//                }
 
-                    //Start looking for developers for the user consultation
-                    //Meanwhile at this point, new users can still report and later be invited to the consultation
-                    Developer developer = getCompany().getAvailableDeveloper();
-
-                    System.out.println(toString() + " found developer " + developer.toString() + ".");
-
-                    //Create new consultation
-                    UserConsultation userConsultation = new UserConsultation(this);
-
-                    //Invite the developer to the user consultation
-                    userConsultation.addDeveloper(developer);
-
-                    //Get the reports from users
-                    List<Report> reports = getCompany().getReports();
-
-                    //Go through each report
-                    while (reports.size() > 0) {
-                        Report report = reports.remove(0); //Get the report and remove it
-                        User user = report.getUser(); //Get the user from the report
-
-                        System.out.println(toString() + " inviting " + user.toString() + " to " + userConsultation.toString());
-
-                        //Invite the user to the consultation
-                        userConsultation.addUser(user);
-                    }
-
-                    //Ready up for consultation
-                    userConsultation.begin(); //Start the consultation
-                    super.waitRandomTime(1000, 5000); //Wait between 1000 to 5000 ms
-                    userConsultation.end(); //End the consultation
-                    System.out.println(toString() + " continues working.");
+                /*
+                Software Consultation
+                 */
+                //Check whether there is report from software developers
+                if (getCompany().getSoftwareReports().size() >= 3) {
+                    actSoftwareConsultation();
                 }
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+
         }
+    }
+
+    private void actUserConsulatation() throws InterruptedException{
+        //Report received
+        System.out.println(toString() + " received report.");
+        System.out.println(toString() + " is looking for available developers.");
+
+        //Start looking for developers for the user consultation
+        //Meanwhile at this point, new users can still report and later be invited to the consultation
+        Developer developer = getCompany().getAvailableDeveloper();
+
+        System.out.println(toString() + " found developer " + developer.toString() + ".");
+
+        //Create new consultation
+        UserConsultation userConsultation = new UserConsultation(this);
+
+        //Invite the developer to the user consultation
+        userConsultation.addDeveloper(developer);
+
+        //Get the reports from users
+        List<Report> reports = getCompany().getUserReports();
+
+        //Go through each report
+        while (reports.size() > 0) {
+            Report report = reports.remove(0); //Get the report and remove it
+            User user = (User) report.getPerson(); //Get the user from the report
+
+            System.out.println(toString() + " inviting " + user.toString() + " to " + userConsultation.toString());
+
+            //Invite the user to the consultation
+            userConsultation.addUser(user);
+        }
+
+        //Ready up for consultation
+        userConsultation.begin(); //Start the consultation
+        super.waitRandomTime(1000, 5000); //Wait between 1000 to 5000 ms
+        userConsultation.end(); //End the consultation
+        System.out.println(toString() + " continues working.");
+    }
+
+    private void actSoftwareConsultation() throws InterruptedException {
+        //Report received
+        System.out.println(toString() + " received >=3 reports.");
+        System.out.println(toString() + " inviting all developer.");
+
+        SoftwareConsultation consultation = new SoftwareConsultation(this);
+
+        List<Report> reports = getCompany().getSoftwareReports();
+
+        List<Developer> availableDevelopers = getCompany().getAvailableDevelopers();
+
+        while (reports.size() > 0) {
+            Report report = reports.remove(0);
+            Developer developer = (Developer) report.getPerson();
+
+            if (availableDevelopers.contains(developer)) {
+                consultation.addDeveloper(developer);
+                availableDevelopers.remove(developer);
+            }
+
+            System.out.println(toString() + " inviting " + developer.toString() + " to " + consultation.toString());
+        }
+
+        //Ready up for consultation
+        consultation.begin();
+        super.waitRandomTime(1000, 5000);
+        consultation.end();
+        System.out.println(toString() + " continues working.");
     }
 
     /**
