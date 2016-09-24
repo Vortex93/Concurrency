@@ -31,8 +31,17 @@ public class UserConsultation extends Consultation {
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private final List<User> invitedUsers = new ArrayList<>();
+    /**
+     * A user consultation consists of 1 or more users.
+     */
+    private final List<User> users = new ArrayList<>();
 
+    /**
+     * List of users who are present at the consultation.
+     */
+    private final List<User> arrivedUsers = new ArrayList<>();
+
+    //Semaphores
     private final Semaphore usersReady = new Semaphore(0);
     private final Semaphore developerReady = new Semaphore(0);
 
@@ -45,47 +54,71 @@ public class UserConsultation extends Consultation {
 
     @Override
     public void begin() throws InterruptedException {
-        usersReady.acquire(invitedUsers.size());
-        developerReady.acquire(1);
+        usersReady.acquire();
+        developerReady.acquire();
+
+        //Notify all that the consultation has started (1 = developer)
+        hasStarted.release(arrivedUsers.size() + 1);
         super.begin();
     }
 
+    @Override
+    public void end() {
+        //Notify all that the consultation has ended (1 = developer)
+        hasEnded.release(arrivedUsers.size() + 1);
+        super.end();
+    }
+
     /**
-     * @param developer Add the developer to the user consultation
-     *                  There is only 1 developer allowed per user consultation.
+     * Adds the user to the user list.
+     * In other words, this is a basically an invitation or a invited user list.
+     * <p>
+     * Users added using this method will be considered invited to the consultation.
+     *
+     * @param user The user that is invited.
      */
-    public void addDeveloper(Developer developer) {
+    public void addUser(User user) throws InterruptedException {
+        assert user != null;
+
+        user.assignConsultation(this);
+        users.add(user);
+    }
+
+    /**
+     * Adds the user to the list of arrived list.
+     *
+     * @param user The user that has arrived.
+     */
+    public void addArrivedUser(User user) {
+        assert user != null;
+        arrivedUsers.add(user);
+
+        if (arrivedUsers.size() == users.size()) {
+            //All users are present
+            usersReady.release(1);
+        }
+    }
+
+    /**
+     * Adds the developer to the user consultation.
+     * Only 1 developer can attends this consultation.
+     *
+     * @param developer The developer to attend the consultation.
+     */
+    public void addDeveloper(Developer developer) throws InterruptedException {
         assert developer != null;
 
         /*
         Checks whether there is place for the developer,
         since user consultation can only take 1 developer.
          */
-        if (getDevelopers().size() < 1) {
+        if (getDevelopers().size() == 0) {
             super.addDeveloper(developer); //Add developer
-            developerReady.release(1); //Set the developer ready
         }
     }
 
-    public void addInvitedUser(User user) {
-        assert user != null;
-
-        invitedUsers.add(user);
-    }
-
-    /**
-     * The user calls this method when the user has arrived to the consultation.
-     *
-     * @param user User to be added to the list.
-     */
-    public void addUser(User user) {
-        assert user != null;
-        assert invitedUsers.size() == getUsers().size();
-
-        super.addUser(user); //Add the user
-        if (getUsers().size() == invitedUsers.size()) {
-            usersReady.release(invitedUsers.size()); //Notify that all users are ready
-        }
+    public void setDeveloperReady() {
+        developerReady.release(1);
     }
 
     @Override

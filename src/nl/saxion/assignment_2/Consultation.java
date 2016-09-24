@@ -2,7 +2,6 @@ package nl.saxion.assignment_2;
 
 import nl.saxion.assignment_2.user.Developer;
 import nl.saxion.assignment_2.user.Leader;
-import nl.saxion.assignment_2.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,46 +36,9 @@ public abstract class Consultation {
      */
     private final List<Developer> developers = new ArrayList<>();
 
-    /**
-     * A user consultation consists of 1 or more users.
-     */
-    private final List<User> users = new ArrayList<>();
-
-    protected final Semaphore isReady = new Semaphore(0);
+    //Semaphores
+    protected final Semaphore hasStarted = new Semaphore(0);
     protected final Semaphore hasEnded = new Semaphore(0);
-
-    /**
-     * Start the consultation.
-     * This is called by the leader, to ready up the members.
-     */
-    public void begin() throws InterruptedException {
-        isReady.release(users.size() + developers.size());
-        System.out.println(toString() + " started.");
-    }
-
-    /**
-     * End the consultation.
-     * This is called by the leader, to notify the members to continue what
-     * they were doing.
-     */
-    public void end() {
-        hasEnded.release(users.size() + developers.size());
-        System.out.println(toString() + " ended.");
-    }
-
-    /**
-     * Wait until the consultation is ready.
-     */
-    public void waitUntilReady() throws InterruptedException {
-        isReady.acquire(); //Wait until consultation is ready
-    }
-
-    /**
-     * Wait until the consultation has ended.
-     */
-    public void waitUntilEnd() throws InterruptedException {
-        hasEnded.acquire(); //Wait until consultation has ended
-    }
 
     /**
      * Constructor
@@ -88,18 +50,43 @@ public abstract class Consultation {
     }
 
     /**
-     * @param developer Add the developer to the developer list.
+     * Start the consultation.
+     * This is called by the leader, to ready up the members.
      */
-    protected void addDeveloper(Developer developer) {
-        assert developer != null;
-        this.developers.add(developer);
+    public void begin() throws InterruptedException {
+        System.out.println(toString() + " started.");
     }
 
     /**
-     * @param user Add the user to the users list.
+     * End the consultation.
+     * This is called by the leader, to notify the members to continue what
+     * they were doing.
      */
-    protected void addUser(User user) {
-        this.users.add(user);
+    public void end() {
+        System.out.println(toString() + " ended.");
+    }
+
+    /**
+     * Wait until the consultation has started.
+     */
+    public void waitUntilStart() throws InterruptedException {
+        hasStarted.acquire(); //Wait until consultation has started
+    }
+
+    /**
+     * Wait until the consultation has ended.
+     */
+    public void waitUntilEnd() throws InterruptedException {
+        hasEnded.acquire(); //Wait until consultation has ended
+    }
+
+    /**
+     * @param developer Add the developer to the developer list.
+     */
+    protected void addDeveloper(Developer developer) throws InterruptedException {
+        assert developer != null;
+        developers.add(developer);
+        developer.assignConsultation(this);
     }
 
     /**
@@ -107,12 +94,5 @@ public abstract class Consultation {
      */
     protected List<Developer> getDevelopers() {
         return developers;
-    }
-
-    /**
-     * @return Returns the list of users.
-     */
-    protected List<User> getUsers() {
-        return users;
     }
 }

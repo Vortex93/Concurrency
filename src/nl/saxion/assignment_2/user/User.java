@@ -37,8 +37,6 @@ public class User extends Person {
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private final Semaphore waitForInvitation = new Semaphore(0);
-
     /**
      * This is just for randomness.
      * <p>
@@ -48,6 +46,9 @@ public class User extends Person {
      * encounter less of.
      */
     private float problemEncounterProbabilityMultiplier = 1f;
+
+    //Semaphores
+    private final Semaphore invited = new Semaphore(0);
 
     /**
      * Constructor
@@ -75,23 +76,20 @@ public class User extends Person {
                             toString() + " reporting in.\n" +
                             toString() + " waiting for invitation.");
                     reportIn(); //The user reports to the company
-                    waitForInvitation.acquire(); //Wait for invitation.
+                    invited.acquire(); //Wait until invited.
 
+                    //User arrives to the consultation
+                    UserConsultation consultation = (UserConsultation) super.consultation;
+                    consultation.addArrivedUser(this);
                     System.out.println(toString() + " arrives at the consultation.");
 
-                    UserConsultation consultation = (UserConsultation) super.consultation;
-                    consultation.addUser(this); //User arrives to the consultation
-
-                    System.out.println(toString() + " waits until the consultation is ready.");
-
-                    consultation.waitUntilReady(); //Waits until the user consultation is ready
+                    System.out.println(toString() + " is ready for consultation.");
+                    consultation.waitUntilStart(); //Waits until the user consultation is ready
                     consultation.waitUntilEnd(); //Waits until the consultation ends
-
                     System.out.println(toString() + " exiting the consultation.");
 
                     //This is to lower the chance of encountering the next problem
                     problemEncounterProbabilityMultiplier = RANDOM.nextFloat();
-
                     super.consultation = null;
                 }
             } catch (InterruptedException e) {
@@ -104,7 +102,7 @@ public class User extends Person {
      * Live (causes some delay from 1000 to 2000 ms)
      */
     private void live() throws InterruptedException {
-        System.out.println(toString() + " living la vida loca...");
+        System.out.println(toString() + " living.");
         int randomTime = RANDOM.nextInt(1000) + 1000 + 1;
         Thread.sleep(randomTime);
     }
@@ -136,7 +134,7 @@ public class User extends Person {
         super.assignConsultation(consultation);
 
         System.out.println(toString() + " got invited.");
-        waitForInvitation.release(1); //Got invited
+        invited.release(1); //Got invited
     }
 
     @Override

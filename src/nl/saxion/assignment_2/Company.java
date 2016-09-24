@@ -17,7 +17,7 @@ import java.util.concurrent.Semaphore;
 public class Company {
 
     private static final int DEVELOPER_COUNT = 6;
-    private static final int USER_COUNT = 2;
+    private static final int USER_COUNT = 5;
 
     ///////////////////////////////////////////////////////////////////////////
     // Properties
@@ -35,13 +35,13 @@ public class Company {
     /**
      * Queue list of developers who are available for consultation.
      */
-    private final LinkedBlockingQueue<Developer> availableDevelopers = new LinkedBlockingQueue<>();
+    private final List<Developer> availableDevelopers = new ArrayList<>();
     private final Semaphore hasAvailableDeveloper = new Semaphore(0, true);
 
     /**
      * Reports that are sent by the users.
      */
-    private final LinkedBlockingQueue<Report> reports = new LinkedBlockingQueue<>();
+    private final List<Report> reports = new ArrayList<>();
 
     /**
      * This is the number of users.
@@ -107,7 +107,7 @@ public class Company {
     /**
      * @return Returns the queue of the reports.
      */
-    public LinkedBlockingQueue<Report> getReports() {
+    public List<Report> getReports() {
         return reports;
     }
 
@@ -120,19 +120,30 @@ public class Company {
 
     public void addAvailableDeveloper(Developer developer) throws InterruptedException {
         assert developer != null;
-        hasAvailableDeveloper.release(1);
-        availableDevelopers.put(developer);
+
+        //Add developer to the list of available developer
+        availableDevelopers.add(developer);
+
+        if (availableDevelopers.size() > 0) {
+            hasAvailableDeveloper.release(1);
+        }
     }
 
-    public LinkedBlockingQueue<Developer> getAvailableDevelopers() throws InterruptedException {
+    /**
+     * @return Returns the first available developer.
+     */
+    public Developer getAvailableDeveloper() throws InterruptedException {
         hasAvailableDeveloper.acquire();
-        return availableDevelopers;
+        return availableDevelopers.remove(0); //Remove the first one
     }
 
     public void removeAvailableDeveloper(Developer developer) throws InterruptedException {
         assert developer != null;
 
-        hasAvailableDeveloper.acquire();
         availableDevelopers.remove(developer);
+
+        if (availableDevelopers.size() == 0) {
+            hasAvailableDeveloper.drainPermits();
+        }
     }
 }

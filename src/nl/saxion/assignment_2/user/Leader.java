@@ -4,7 +4,7 @@ import nl.saxion.assignment_2.Company;
 import nl.saxion.assignment_2.Report;
 import nl.saxion.assignment_2.UserConsultation;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -50,39 +50,43 @@ public class Leader extends Person {
                 /*
                 User Consultation
                  */
-                if (getCompany().getReports().size() > 0) { //Check whether there is report
-                    System.out.println(toString() + " received report.\n" +
-                            toString() + " making a user consultation.");
+                //Check whether there is report from users
+                if (getCompany().getReports().size() > 0) {
+                    //Report received
+                    System.out.println(toString() + " received report.");
+                    System.out.println(toString() + " is looking for available developers.");
 
-                    //Get the reports
-                    LinkedBlockingQueue<Report> reports = getCompany().getReports();
-
-                    UserConsultation userConsultation = new UserConsultation(this);
-
-                    for (int i = 0; i < reports.size(); i++) {
-                        Report report = reports.poll();
-                        User user = report.getUser(); //Get the user in charge of the report
-
-                        System.out.println(toString() + " inviting " + user.toString() + " to the consultation.");
-                        user.assignConsultation(userConsultation); //Invite the user to the consultation
-                        userConsultation.addInvitedUser(user);
-                    }
-
-                    //Wait for developers to be available
-                    System.out.println(toString() + " is getting available developers.");
-                    LinkedBlockingQueue<Developer> availableDevelopers = getCompany().getAvailableDevelopers();
-                    Developer developer = availableDevelopers.peek();
+                    //Start looking for developers for the user consultation
+                    //Meanwhile at this point, new users can still report and later be invited to the consultation
+                    Developer developer = getCompany().getAvailableDeveloper();
 
                     System.out.println(toString() + " found developer " + developer.toString() + ".");
-                    developer.assignConsultation(userConsultation); //Invite developer to the user consultation
 
-                    userConsultation.begin(); //Start the consultation meeting.
-                    System.out.println(toString() + " is consulting.");
+                    //Create new consultation
+                    UserConsultation userConsultation = new UserConsultation(this);
 
+                    //Invite the developer to the user consultation
+                    userConsultation.addDeveloper(developer);
+
+                    //Get the reports from users
+                    List<Report> reports = getCompany().getReports();
+
+                    //Go through each report
+                    while (reports.size() > 0) {
+                        Report report = reports.remove(0); //Get the report and remove it
+                        User user = report.getUser(); //Get the user from the report
+
+                        System.out.println(toString() + " inviting " + user.toString() + " to " + userConsultation.toString());
+
+                        //Invite the user to the consultation
+                        userConsultation.addUser(user);
+                    }
+
+                    //Ready up for consultation
+                    userConsultation.begin(); //Start the consultation
                     super.waitRandomTime(1000, 5000); //Wait between 1000 to 5000 ms
-
-                    System.out.println(toString() + " is ending the consultation.");
-                    userConsultation.end();
+                    userConsultation.end(); //End the consultation
+                    System.out.println(toString() + " continues working.");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

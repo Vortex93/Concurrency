@@ -49,15 +49,14 @@ public class Developer extends Person {
                 if (isAttendingConsultation) {
                     if (consultation instanceof UserConsultation) {
                         UserConsultation consultation = (UserConsultation) this.consultation;
-                        consultation.addDeveloper(this); //Developer adds itself to notify that the developer is ready
 
-                        System.out.println(toString() + " attending the consultation.\n" +
-                                toString() + " waiting for the consultation to start.");
+                        //Developer ready up for the consultation
+                        consultation.setDeveloperReady();
 
-                        consultation.waitUntilReady();
+                        System.out.println(toString() + " is ready for consultation.");
+                        consultation.waitUntilStart();
                         consultation.waitUntilEnd();
                         System.out.println(toString() + " is exiting the consultation.");
-
 
                         /*
                         Remove available developer method is not required in this
@@ -66,7 +65,6 @@ public class Developer extends Person {
                          */
                     } else if (consultation instanceof SoftwareConsultation) {
                         // TODO: 23-Sep-16 Implementation of the software consultation
-
                     }
                     super.consultation = null;
                     System.out.println(toString() + " continues with work.");
