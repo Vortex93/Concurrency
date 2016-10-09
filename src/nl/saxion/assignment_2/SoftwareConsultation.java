@@ -29,6 +29,12 @@ public class SoftwareConsultation extends Consultation {
      */
     private final List<Developer> developers = new ArrayList<>();
 
+    /**
+     * This semaphore is conditionally dependant on:
+     * - When there is certain amount of developers attending the software consultation.
+     * <p>
+     * When the conditions are true, the semaphore is released.
+     */
     private Semaphore developerReady = new Semaphore(0); //min 3
 
 
@@ -42,7 +48,6 @@ public class SoftwareConsultation extends Consultation {
     @Override
     public void begin() throws InterruptedException {
         developerReady.acquire();
-        //TODO: ----------V----------
         hasStarted.release(developers.size());
         super.begin();
     }
@@ -70,6 +75,7 @@ public class SoftwareConsultation extends Consultation {
      * Releases semaphore with the amount of developers that can attend the consultation.
      */
     private void setDevelopersReady(int amount) {
+        assert amount > 0;
         developerReady.release(amount);
     }
 

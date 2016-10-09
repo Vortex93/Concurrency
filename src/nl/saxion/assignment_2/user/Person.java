@@ -1,9 +1,7 @@
 package nl.saxion.assignment_2.user;
 
-import com.sun.deploy.association.AssociationAlreadyRegisteredException;
 import nl.saxion.assignment_2.Company;
 import nl.saxion.assignment_2.Consultation;
-import nl.saxion.assignment_2.UserConsultation;
 
 import java.util.Random;
 
@@ -16,11 +14,16 @@ import java.util.Random;
 @SuppressWarnings("WeakerAccess")
 public abstract class Person implements Runnable {
 
+    /**
+     * This is used throughout subclasses, to help generate random decision.
+     * To help make the simulation more realistic.
+     */
     private static final Random RANDOM = new Random();
 
     ///////////////////////////////////////////////////////////////////////////
     // Properties
     ///////////////////////////////////////////////////////////////////////////
+
     /**
      * Unique identifier.
      */
@@ -79,6 +82,8 @@ public abstract class Person implements Runnable {
      * @param max The maximum amount of time to wait.
      */
     protected void waitRandomTime(int min, int max) {
+        assert min > 0;
+
         int randomTime = RANDOM.nextInt(min) + max + 1;
         try {
             Thread.sleep(randomTime);

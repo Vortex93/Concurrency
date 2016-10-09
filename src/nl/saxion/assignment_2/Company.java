@@ -6,7 +6,6 @@ import nl.saxion.assignment_2.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -16,8 +15,16 @@ import java.util.concurrent.Semaphore;
 @SuppressWarnings("WeakerAccess")
 public class Company {
 
-    private static final int DEVELOPER_COUNT = 6;
-    private static final int USER_COUNT = 5;
+    /**
+     * The amount of developer to generate.
+     * By default: 6
+     */
+    private static final int DEVELOPER_COUNT = 2;
+
+    /**
+     * The amount of users to generate.
+     */
+    private static final int USER_COUNT = 2;
 
     ///////////////////////////////////////////////////////////////////////////
     // Properties
@@ -25,18 +32,20 @@ public class Company {
     /**
      * Leader of the team.
      */
-    private Leader leader = new Leader(0, this);
+    private final Leader leader = new Leader(0, this);
 
     /**
-     * The team consists of 6 developer.
+     * This represents the team of developers.
      */
-    private final LinkedBlockingQueue<Developer> developers = new LinkedBlockingQueue<>();
+    private final List<Developer> developers = new ArrayList<>();
 
     /**
-     * Queue list of developers who are available for consultation.
+     * This is the number of users.
+     * These users have a relation with this company.
+     * <p>
+     * P.S.: This number can be changed to a random value.
      */
-    private final List<Developer> availableDevelopers = new ArrayList<>();
-    private final Semaphore hasAvailableDevelopers = new Semaphore(0, true);
+    private final List<User> users = new ArrayList<>();
 
     /**
      * Reports that are sent by the users.
@@ -49,25 +58,31 @@ public class Company {
     private final List<Report> softwareReports = new ArrayList<>();
 
     /**
-     * This is the number of users.
-     * These users have a relation with this company.
-     * <p>
-     * P.S.: This number can be changed to a random value.
+     * Queue list of developers who are available for consultation.
      */
-    private final List<User> users = new ArrayList<>();
+    private final List<Developer> availableDevelopers = new ArrayList<>();
+
+    /**
+     * This semaphore is conditionally dependant on:
+     * - Whether there is at least 1 available developer in the list.
+     */
+    private final Semaphore hasAvailableDevelopers = new Semaphore(0, true);
 
     /**
      * Constructor
      */
     public Company() {
+        //No implementation required
+    }
+
+    /**
+     * Starts the simulation.
+     */
+    public void init() {
         //Create developers for the company
         for (int i = 0; i < DEVELOPER_COUNT; i++) {
             Developer developer = new Developer(i, this); //Create new developer
-            try {
-                developers.put(developer); //Add user to the queue
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            addDeveloper(developer); //Add developer to the company
         }
 
         //Create all the users
@@ -106,20 +121,6 @@ public class Company {
     }
 
     /**
-     * @return Returns the leader of the team / company.
-     */
-    public Leader getLeader() {
-        return leader;
-    }
-
-    /**
-     * @return Returns the queue of the developers
-     */
-    public LinkedBlockingQueue<Developer> getDevelopers() {
-        return developers;
-    }
-
-    /**
      * @return Returns the queue of the user reports.
      */
     public List<Report> getUserReports() {
@@ -134,18 +135,17 @@ public class Company {
     }
 
     /**
-     * @return Returns true if there is any user reports, otherwise false.
+     * Add an available developer to the available list.
+     *
+     * @param developer The developer who is available.
      */
-    public boolean hasReports() {
-        return userReports.size() > 0;
-    }
-
     public void addAvailableDeveloper(Developer developer) throws InterruptedException {
         assert developer != null;
 
         //Add developer to the list of available developer
         availableDevelopers.add(developer);
 
+        //Due to problem with mutex, this solution seems to work best
         if (availableDevelopers.size() > 0) {
             hasAvailableDevelopers.release(1);
         }
@@ -159,11 +159,18 @@ public class Company {
         return availableDevelopers.remove(0); //Remove the first one
     }
 
+    /**
+     * Remove a developer from the available list.
+     * This is called when the developer is no longer available.
+     *
+     * @param developer The developer who used to be available.
+     */
     public void removeAvailableDeveloper(Developer developer) throws InterruptedException {
         assert developer != null;
 
-        availableDevelopers.remove(developer);
+        availableDevelopers.remove(developer); //Remove developer from tha available list
 
+        //Due to problem with mutex, this solution seems to work best
         if (availableDevelopers.size() == 0) {
             hasAvailableDevelopers.drainPermits();
         }
@@ -174,7 +181,6 @@ public class Company {
      */
     public List<Developer> getAvailableDevelopers() throws InterruptedException {
         hasAvailableDevelopers.acquire();
-       /* availableDevelopers.clear();*/
         return availableDevelopers;
     }
 }

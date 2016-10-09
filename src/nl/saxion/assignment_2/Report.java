@@ -3,6 +3,10 @@ package nl.saxion.assignment_2;
 import nl.saxion.assignment_2.user.Person;
 
 /**
+ * This class simulates a report.
+ * Mainly used by the users and developer to address their
+ * problem with something.
+ * <p>
  * Created by Derwin on 14-Sep-16.
  */
 public class Report {
@@ -11,12 +15,13 @@ public class Report {
     // Properties
     ///////////////////////////////////////////////////////////////////////////
 
-    private Person person;
-    private String problem;
+    private final Person person;
+    private final String problem;
 
     /**
      * Constructor
-     * @param person Person who writes the report.
+     *
+     * @param person  Person who writes the report.
      * @param problem Description of the report.
      */
     public Report(Person person, String problem) {

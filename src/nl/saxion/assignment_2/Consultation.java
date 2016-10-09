@@ -46,6 +46,7 @@ public abstract class Consultation {
      * @param leader The leader who created this consultation.
      */
     protected Consultation(Leader leader) {
+        assert leader != null;
         this.leader = leader;
     }
 
@@ -81,12 +82,12 @@ public abstract class Consultation {
     }
 
     /**
-     * @param developer Add the developer to the developer list.
+     * @param developer Add the developer to the developer invitation list.
      */
     protected void addDeveloper(Developer developer) throws InterruptedException {
         assert developer != null;
-        developers.add(developer);
-        developer.assignConsultation(this);
+        developers.add(developer); //Invite developer
+        developer.assignConsultation(this); //Assign this consultation to the developer
     }
 
     /**

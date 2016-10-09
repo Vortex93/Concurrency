@@ -6,7 +6,6 @@ import nl.saxion.assignment_2.SoftwareConsultation;
 import nl.saxion.assignment_2.UserConsultation;
 
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 /**
  * Represents the scrum leader.
@@ -15,18 +14,21 @@ import java.util.concurrent.Semaphore;
  */
 public class Leader extends Person {
 
+    /**
+     * The minimum amount of user reports to act upon.
+     * By default: 1 (according to assignment)
+     */
+    private static final int MIN_USER_REPORT = 1;
+
+    /**
+     * The minimum amount of developer reports to act upon.
+     * By default: 3 (according to assignment)
+     */
+    private static final int MIN_DEVELOPER_REPORT = 3;
+
     ///////////////////////////////////////////////////////////////////////////
     // Properties
     ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This semaphore is conditionally dependant on:
-     * - The leader is not participating in a consultation.
-     * - The leader received an invitation.
-     * <p>
-     * The semaphore release on the conditions specified.
-     */
-    private Semaphore readyForConsultation = new Semaphore(0);
 
     /**
      * Constructor
@@ -48,33 +50,27 @@ public class Leader extends Person {
             try {
                 work(); //Delay for 1000 to 2000 ms
 
-                /*
-                User Consultation
-                 */
-                //Check whether there is report from users
-//                if (getCompany().getUserReports().size() > 0) {
-//                    actUserConsulatation();
-//                }
-
-                /*
-                Software Consultation
-                 */
-                //Check whether there is report from software developers
-                if (getCompany().getSoftwareReports().size() >= 3) {
-                    actSoftwareConsultation();
+                if (shouldHandleUserReports()) {
+                    //Handle user consultation
+                    handleUserConsultation();
                 }
 
+                if (shouldHandleSoftwareReports()) {
+                    //Handle software consultation
+                    handleSoftwareConsultation();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 
-    private void actUserConsulatation() throws InterruptedException{
-        //Report received
-        System.out.println(toString() + " received report.");
+    /**
+     * Handle the user's reports.
+     * Create a new consultation for the users who have reported in.
+     */
+    private void handleUserConsultation() throws InterruptedException {
+        System.out.println(toString() + " handling user consultation.");
         System.out.println(toString() + " is looking for available developers.");
 
         //Start looking for developers for the user consultation
@@ -83,17 +79,13 @@ public class Leader extends Person {
 
         System.out.println(toString() + " found developer " + developer.toString() + ".");
 
-        //Create new consultation
-        UserConsultation userConsultation = new UserConsultation(this);
 
-        //Invite the developer to the user consultation
-        userConsultation.addDeveloper(developer);
+        UserConsultation userConsultation = new UserConsultation(this); //Create new consultation
+        userConsultation.addDeveloper(developer); //Invite the developer to the user consultation
 
-        //Get the reports from users
-        List<Report> reports = getCompany().getUserReports();
+        List<Report> reports = getCompany().getUserReports(); //Get the reports from users
 
-        //Go through each report
-        while (reports.size() > 0) {
+        while (reports.size() > 0) { //While has reports
             Report report = reports.remove(0); //Get the report and remove it
             User user = (User) report.getPerson(); //Get the user from the report
 
@@ -110,33 +102,35 @@ public class Leader extends Person {
         System.out.println(toString() + " continues working.");
     }
 
-    private void actSoftwareConsultation() throws InterruptedException {
-        //Report received
-        System.out.println(toString() + " received >=3 reports.");
+    /**
+     * Handles the developer's reports.
+     * To create a new consultation to have a meeting with the developers
+     * who have reported in.
+     */
+    private void handleSoftwareConsultation() throws InterruptedException {
+        System.out.println(toString() + " handling software consultation.");
         System.out.println(toString() + " inviting all developer.");
 
-        SoftwareConsultation consultation = new SoftwareConsultation(this);
+        SoftwareConsultation consultation = new SoftwareConsultation(this); //Create new consultation
 
-        List<Report> reports = getCompany().getSoftwareReports();
+        List<Report> reports = getCompany().getSoftwareReports(); //Get reports
+        List<Developer> availableDevelopers = getCompany().getAvailableDevelopers(); //Get all available developers
 
-        List<Developer> availableDevelopers = getCompany().getAvailableDevelopers();
+        while (reports.size() > 0) { //While has reports
+            Report report = reports.remove(0); //Remove the first from the list
+            Developer developer = (Developer) report.getPerson(); //Get the person from the report
 
-        while (reports.size() > 0) {
-            Report report = reports.remove(0);
-            Developer developer = (Developer) report.getPerson();
-
-            if (availableDevelopers.contains(developer)) {
-                consultation.addDeveloper(developer);
-                availableDevelopers.remove(developer);
+            if (availableDevelopers.contains(developer)) { //If currently available developer has reported in
+                consultation.addDeveloper(developer); //Add developer to the invitation list of the consultation
+                availableDevelopers.remove(developer); //Remove the available developer from the available list
             }
-
             System.out.println(toString() + " inviting " + developer.toString() + " to " + consultation.toString());
         }
 
         //Ready up for consultation
-        consultation.begin();
-        super.waitRandomTime(1000, 5000);
-        consultation.end();
+        consultation.begin(); //Start consultation
+        super.waitRandomTime(1000, 5000); //Address problem for 1 to 5 seconds
+        consultation.end(); //End consultation
         System.out.println(toString() + " continues working.");
     }
 
@@ -145,6 +139,20 @@ public class Leader extends Person {
      */
     private void work() throws InterruptedException {
         super.waitRandomTime(1000, 2000);
+    }
+
+    /**
+     * @return Returns true if the leader should handle the user reports, otherwise false.
+     */
+    private boolean shouldHandleUserReports() {
+        return getCompany().getUserReports().size() >= MIN_USER_REPORT;
+    }
+
+    /**
+     * @return Returns true if the leader should handle the software reports, otherwise false.
+     */
+    private boolean shouldHandleSoftwareReports() {
+        return getCompany().getSoftwareReports().size() >= MIN_DEVELOPER_REPORT;
     }
 
     @Override

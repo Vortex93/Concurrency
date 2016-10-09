@@ -47,7 +47,12 @@ public class User extends Person {
      */
     private float problemEncounterProbabilityMultiplier = 1f;
 
-    //Semaphores
+    /**
+     * This semaphore is conditionally dependant on:
+     * - When the user is invited by the leader.
+     * <p>
+     * When the conditions are true, the semaphore is released.
+     */
     private final Semaphore invited = new Semaphore(0);
 
     /**
@@ -79,8 +84,8 @@ public class User extends Person {
                     invited.acquire(); //Wait until invited.
 
                     //User arrives to the consultation
-                    UserConsultation consultation = (UserConsultation) super.consultation;
-                    consultation.addArrivedUser(this);
+                    UserConsultation consultation = (UserConsultation) super.consultation; //Get assigned consultation (by leader)
+                    consultation.addArrivedUser(this); //Add to the arriving list
                     System.out.println(toString() + " arrives at the consultation.");
 
                     System.out.println(toString() + " is ready for consultation.");
