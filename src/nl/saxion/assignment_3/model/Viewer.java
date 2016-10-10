@@ -7,6 +7,9 @@ import nl.saxion.assignment_3.Store;
  */
 public class Viewer extends Person {
 
+    /**
+     * Help provide unique identifier for viewers.
+     */
     private static int counter = 0;
 
     /**
@@ -29,9 +32,12 @@ public class Viewer extends Person {
         }
     }
 
+    /**
+     * Walk a random amount of time in the store.
+     */
     private void walkAround() throws InterruptedException {
         System.out.println(toString() + " inside store");
-        int max = store.MAX_TIME_INSIDE;
+        int max = Store.MAX_TIME_INSIDE;
         int time = random.nextInt(max - 1000) + 1000;
         Thread.sleep(time);
     }

@@ -7,6 +7,9 @@ import nl.saxion.assignment_3.Store;
  */
 public class Buyer extends Person {
 
+    /**
+     * Help provide unique identifier for buyers.
+     */
     private static int counter = 0;
 
     /**
@@ -29,10 +32,13 @@ public class Buyer extends Person {
         }
     }
 
+    /**
+     * Negotiate with the store a random amount of time.
+     */
     private void negotiate() throws InterruptedException {
         System.out.println(toString() + " negotiating...");
-        int max = store.MAX_NEGOTIATION_TIME;
-        int min = store.MIN_NEGOTIATION_TIME;
+        int max = Store.MAX_NEGOTIATION_TIME;
+        int min = Store.MIN_NEGOTIATION_TIME;
         int time = random.nextInt(max - min) + min;
         Thread.sleep(time);
     }

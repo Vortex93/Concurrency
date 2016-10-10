@@ -10,6 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * This is the store that is managed by the HISWA organisation.
  * Created by Derwin on 10-Oct-16.
  */
 public class Store {
@@ -41,19 +42,24 @@ public class Store {
     private final Condition notFull = lock.newCondition();
     private final Condition isEmpty = lock.newCondition();
 
+    /**
+     * Permissions
+     */
     private boolean viewerHasPermission = false;
     private boolean buyerHasPermission = false;
 
+    /**
+     * Counter on how many buyer has negotiated.
+     * If the remainder of this value (using SUCCESSIVE_THRESHOLD) is 0,
+     * then the permission is given to the viewer.
+     */
     private int successiveCounter = 0;
 
     /**
-     * Constructor
+     * Add a person to the waiting line. (outside the entrance)
+     * @param person The person that is going to wait in line.
      */
-    public Store() {
-
-    }
-
-    public void addWaiting(Person person) {
+    public void addToWaiting(Person person) {
         assert person != null;
         lock.lock();
         waiting.add(person);
@@ -63,10 +69,18 @@ public class Store {
             } else {
                 giveViewerPermission();
             }
+        } else {
+            if (person instanceof Buyer) {
+                giveBuyerPermission();
+            }
         }
         lock.unlock();
     }
 
+    /**
+     * This method is called when a person comes inside the store.
+     * @param person The person that is going inside.
+     */
     public void addToInside(Person person) {
         assert person != null;
         lock.lock();
@@ -76,46 +90,56 @@ public class Store {
         lock.unlock();
     }
 
+    /**
+     * This method is called whenever a person exists the store.
+     * @param person The person that is leaving the building.
+     */
     public void removeFromInside(Person person) {
         assert person != null;
         lock.lock();
-
         if (person instanceof Buyer) {
-            if (++successiveCounter % SUCCESSIVE_THRESHOLD == 0
-                    || getAmountBuyerWaiting() == 0) {
+            //Buyer
+            if (++successiveCounter % SUCCESSIVE_THRESHOLD == 0) {
                 giveViewerPermission();
             } else {
                 giveBuyerPermission();
             }
-        }
-
-        inside.remove(person);
-
-        if (viewerHasPermission) {
-            viewerPermission.signal();
         } else {
-            if (isEmpty()) {
-                buyerPermission.signal();
-                isEmpty.signal();
+            //Viewer
+            if (isFull()) {
+                if (getAmountBuyerWaiting() > 0) {
+                    giveBuyerPermission();
+                }
             }
         }
-        notFull.signal();
 
+        inside.remove(person); //Person exists the store
         System.out.println(person.toString() + " exits store (" + inside.size() + ")");
-        lock.unlock();
 
+        if (viewerHasPermission) {
+            viewerPermission.signal(); //Signal a viewer to come inside
+            notFull.signal();
+        } else if (isEmpty()) {
+            buyerPermission.signal(); //Signal a buyer to come inside
+            isEmpty.signal(); //Notify the buyer that the store is empty
+        }
+        lock.unlock();
     }
 
+    /**
+     * People wait at this point until they are given
+     * permission to come inside the store.
+     * @param person The person that is awaiting permission.
+     */
     public void waitForPermission(Person person) {
-        try{
+        try {
             lock.lock();
-
-
             System.out.println(person.toString() + " waits for permission");
             if (person instanceof Viewer) { //Person is a viewer
-                while (!viewerHasPermission) {
+                while (!viewerHasPermission)
                     viewerPermission.await(); //Wait for viewer permission
-                }
+                while (isFull())
+                    notFull.await(); //Wait until it is not full
             } else if (person instanceof Buyer) { //Person is a buyer
                 while (!buyerHasPermission) {
                     buyerPermission.await(); //Wait for a buyer permission
@@ -127,18 +151,18 @@ public class Store {
                 }
             }
             viewerPermission.signal();
-
-            while (isFull())
-                notFull.await(); //Wait until it is not full
-
-            addToInside(person); //Add person inside the storez
-        } catch  (InterruptedException e) {
+            addToInside(person); //Add person inside the store
+        } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             lock.unlock();
         }
     }
 
+    /**
+     * @return Returns the amount of buyer that is waiting outside in the line
+     * to come inside the store.
+     */
     private int getAmountBuyerWaiting() {
         int counter = 0;
         for (Person person : waiting) {
@@ -149,28 +173,32 @@ public class Store {
         return counter;
     }
 
+    /**
+     * Gives permission to the viewer.
+     * NOTE: This does not signal a viewer to come inside.
+     */
     private void giveViewerPermission() {
         viewerHasPermission = !(buyerHasPermission = false);
     }
 
+    /**
+     * Gives permission to the buyer
+     * NOTE: This does not signal a buyer to come inside.
+     */
     private void giveBuyerPermission() {
         buyerHasPermission = !(viewerHasPermission = false);
     }
 
     /**
-     * @return Returns true
+     * @return Returns true if the store is full.
      */
     private boolean isFull() {
         return inside.size() >= MAX_ALLOWED_VIEWER;
-//        int viewerCounter = 0;
-//        int buyerCounter = 0;
-//        for (Person person : inside) {
-//            viewerCounter += person instanceof Viewer ? 1 : 0;
-//            buyerCounter += person instanceof Buyer ? 1 : 0;
-//        }
-//        return buyerCounter >= MAX_ALLOWED_BUYER || viewerCounter >= MAX_ALLOWED_VIEWER;
     }
 
+    /**
+     * @return Returns true if the store is empty.
+     */
     private boolean isEmpty() {
         return inside.size() == 0;
     }

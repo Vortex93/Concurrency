@@ -28,9 +28,9 @@ public class Main {
         Store store = new Store();
 
         //Populate the array of people
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 30; i++) {
             people.add(new Viewer(store));
-            if (i < 20) { //Add buyers
+            if (i < 8) { //Add buyers
                 people.add(new Buyer(store));
             }
         }
