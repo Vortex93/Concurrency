@@ -3,6 +3,8 @@ package nl.saxion.assignment_3.model;
 import nl.saxion.assignment_3.Store;
 
 /**
+ * Buyers are given access to the store to negotiate.
+ * <p>
  * Created by Derwin on 10-Oct-16.
  */
 public class Buyer extends Person {
