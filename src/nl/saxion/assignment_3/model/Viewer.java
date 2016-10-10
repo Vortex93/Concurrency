@@ -33,6 +33,7 @@ public class Viewer extends Person {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+        Thread.currentThread().interrupt();
     }
 
     /**
